@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>💗 Te quiero mucho Mimi 💗</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    background-color: #000;
+    font-family: 'Arial Black', Arial, sans-serif;
+    color: white;
+    position: relative;
+  }
+
+  #center-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem; /* más pequeño */
+    color: white;
+    font-weight: 900;
+    text-shadow:
+      0 0 10px #fff,
+      0 0 20px #ff69b4,
+      0 0 30px #ff1493,
+      0 0 40px #ff1493,
+      0 0 50px #ff69b4,
+      0 0 60px #ff1493,
+      0 0 70px #ff69b4;
+    user-select: none;
+    white-space: nowrap;
+    z-index: 10;
+    text-align: center;
+  }
+
+  #falling-container {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    overflow: hidden;
+    top: 0; left: 0;
+    z-index: 5;
+  }
+
+  .teamo {
+    position: absolute;
+    color: #ff1493;
+    font-weight: 900;
+    font-size: 1.8rem;
+    text-transform: uppercase;
+    text-shadow:
+      0 0 5px #ff69b4,
+      0 0 10px #ff1493,
+      0 0 15px #ff69b4,
+      0 0 20px #ff1493;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .teamo::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    transform: scaleY(-1);
+    color: #ff69b4;
+    opacity: 0.25;
+    filter: blur(1px);
+    text-shadow: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="falling-container"></div>
+
+<div id="center-text">💗Te quiero mucho Mimi💗</div>
+
+<script>
+  const container = document.getElementById('falling-container');
+  const textos = [];
+  const cantidad = 50;
+
+  let viewportWidth = window.innerWidth;
+  let viewportHeight = window.innerHeight;
+
+  // Generar letras que caen
+  for(let i=0; i<cantidad; i++) {
+    const span = document.createElement('span');
+    span.classList.add('teamo');
+    span.setAttribute('data-text', 'TE QUIERO');
+    span.textContent = 'TE QUIERO';
+    span.style.left = Math.random() * viewportWidth + 'px';
+    span.style.top = (Math.random() * -viewportHeight) + 'px';
+
+    const size = 1.2 + Math.random() * 1.8;
+    span.style.fontSize = (size * 1.8) + 'rem';
+
+    // velocidad más rápida
+    const speed = 1 + (2 - size) * 2; 
+
+    container.appendChild(span);
+
+    textos.push({
+      element: span,
+      speed: speed,
+      size: size,
+      x: parseFloat(span.style.left),
+      y: parseFloat(span.style.top),
+    });
+  }
+
+  // Animación de caída
+  function animar() {
+    textos.forEach(obj => {
+      obj.y += obj.speed;
+      if (obj.y > viewportHeight) {
+        obj.y = -30 - Math.random()*100;
+        obj.x = Math.random() * viewportWidth;
+        obj.element.style.left = obj.x + 'px';
+      }
+      obj.element.style.top = obj.y + 'px';
+    });
+    requestAnimationFrame(animar);
+  }
+  animar();
+
+  // Ajustar al redimensionar
+  window.addEventListener('resize', () => {
+    viewportWidth = window.innerWidth;
+    viewportHeight = window.innerHeight;
+    textos.forEach(obj => {
+      obj.x = Math.random() * viewportWidth;
+      obj.element.style.left = obj.x + 'px';
+    });
+  });
+
+  // Explosión al tocar/click
+  function explosion(x, y) {
+    for (let i=0; i<20; i++) {
+      const span = document.createElement('span');
+      span.classList.add('teamo');
+      span.setAttribute('data-text', 'TE QUIERO');
+      span.textContent = 'TE QUIERO';
+      span.style.left = x + 'px';
+      span.style.top = y + 'px';
+
+      const size = 1 + Math.random() * 1.5;
+      span.style.fontSize = (size * 1.5) + 'rem';
+
+      container.appendChild(span);
+
+      let angle = Math.random() * 2 * Math.PI;
+      let velocity = 2 + Math.random() * 4;
+      let dx = Math.cos(angle) * velocity;
+      let dy = Math.sin(angle) * velocity;
+
+      let life = 60; // frames
+
+      function animateExplosion() {
+        if (life-- > 0) {
+          x += dx;
+          y += dy;
+          span.style.left = x + 'px';
+          span.style.top = y + 'px';
+          requestAnimationFrame(animateExplosion);
+        } else {
+          span.remove();
+        }
+      }
+      animateExplosion();
+    }
+  }
+
+  document.addEventListener('click', e => {
+    explosion(e.clientX, e.clientY);
+  });
+  document.addEventListener('touchstart', e => {
+    const touch = e.touches[0];
+    explosion(touch.clientX, touch.clientY);
+  });
+</script>
+
+</body>
+</html>
