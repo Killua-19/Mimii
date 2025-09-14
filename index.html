@@ -21,21 +21,24 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 2rem; /* más pequeño */
-    color: white;
+    font-size: 2.5rem;
     font-weight: 900;
-    text-shadow:
-      0 0 10px #fff,
-      0 0 20px #ff69b4,
-      0 0 30px #ff1493,
-      0 0 40px #ff1493,
-      0 0 50px #ff69b4,
-      0 0 60px #ff1493,
-      0 0 70px #ff69b4;
+    background: linear-gradient(90deg, #ff69b4, #ff1493, #fff, #ff1493, #ff69b4);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 6s ease infinite;
+    text-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
     user-select: none;
     white-space: nowrap;
     z-index: 10;
     text-align: center;
+  }
+
+  @keyframes shine {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 
   #falling-container {
@@ -56,23 +59,10 @@
     text-transform: uppercase;
     text-shadow:
       0 0 5px #ff69b4,
-      0 0 10px #ff1493,
-      0 0 15px #ff69b4,
-      0 0 20px #ff1493;
+      0 0 15px #ff1493,
+      0 0 25px #ff69b4;
     user-select: none;
     white-space: nowrap;
-  }
-
-  .teamo::after {
-    content: attr(data-text);
-    position: absolute;
-    left: 0;
-    top: 100%;
-    transform: scaleY(-1);
-    color: #ff69b4;
-    opacity: 0.25;
-    filter: blur(1px);
-    text-shadow: none;
   }
 </style>
 </head>
@@ -80,44 +70,43 @@
 
 <div id="falling-container"></div>
 
-<div id="center-text">💗Te quiero mucho Mimi💗</div>
+<div id="center-text">💗 Te quiero mucho Mimi 💗</div>
 
 <script>
   const container = document.getElementById('falling-container');
   const textos = [];
+  const explosiones = [];
   const cantidad = 50;
 
   let viewportWidth = window.innerWidth;
   let viewportHeight = window.innerHeight;
 
-  // Generar letras que caen
+  // Letras cayendo
   for(let i=0; i<cantidad; i++) {
     const span = document.createElement('span');
     span.classList.add('teamo');
-    span.setAttribute('data-text', 'TE QUIERO');
     span.textContent = 'TE QUIERO';
     span.style.left = Math.random() * viewportWidth + 'px';
     span.style.top = (Math.random() * -viewportHeight) + 'px';
 
-    const size = 1.2 + Math.random() * 1.8;
-    span.style.fontSize = (size * 1.8) + 'rem';
+    const size = 1 + Math.random() * 1.5;
+    span.style.fontSize = (size * 2) + 'rem';
 
-    // velocidad más rápida
-    const speed = 1 + (2 - size) * 2; 
+    const speed = 1.5 + (2 - size) * 2;
 
     container.appendChild(span);
 
     textos.push({
       element: span,
       speed: speed,
-      size: size,
       x: parseFloat(span.style.left),
       y: parseFloat(span.style.top),
     });
   }
 
-  // Animación de caída
+  // Animación principal
   function animar() {
+    // caída
     textos.forEach(obj => {
       obj.y += obj.speed;
       if (obj.y > viewportHeight) {
@@ -127,54 +116,52 @@
       }
       obj.element.style.top = obj.y + 'px';
     });
+
+    // explosiones
+    explosiones.forEach((exp, i) => {
+      exp.life--;
+      exp.x += exp.dx;
+      exp.y += exp.dy;
+      exp.element.style.left = exp.x + 'px';
+      exp.element.style.top = exp.y + 'px';
+      if (exp.life <= 0) {
+        exp.element.remove();
+        explosiones.splice(i, 1);
+      }
+    });
+
     requestAnimationFrame(animar);
   }
   animar();
 
-  // Ajustar al redimensionar
+  // Redimensionar
   window.addEventListener('resize', () => {
     viewportWidth = window.innerWidth;
     viewportHeight = window.innerHeight;
-    textos.forEach(obj => {
-      obj.x = Math.random() * viewportWidth;
-      obj.element.style.left = obj.x + 'px';
-    });
   });
 
-  // Explosión al tocar/click
+  // Explosión
   function explosion(x, y) {
-    for (let i=0; i<20; i++) {
+    for (let i=0; i<25; i++) {
       const span = document.createElement('span');
       span.classList.add('teamo');
-      span.setAttribute('data-text', 'TE QUIERO');
       span.textContent = 'TE QUIERO';
       span.style.left = x + 'px';
       span.style.top = y + 'px';
-
-      const size = 1 + Math.random() * 1.5;
-      span.style.fontSize = (size * 1.5) + 'rem';
-
+      span.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
       container.appendChild(span);
 
       let angle = Math.random() * 2 * Math.PI;
-      let velocity = 2 + Math.random() * 4;
-      let dx = Math.cos(angle) * velocity;
-      let dy = Math.sin(angle) * velocity;
+      let velocity = 3 + Math.random() * 5;
 
-      let life = 60; // frames
-
-      function animateExplosion() {
-        if (life-- > 0) {
-          x += dx;
-          y += dy;
-          span.style.left = x + 'px';
-          span.style.top = y + 'px';
-          requestAnimationFrame(animateExplosion);
-        } else {
-          span.remove();
-        }
-      }
-      animateExplosion();
+      explosiones.push({
+        element: span,
+        x: x,
+        y: y,
+        dx: Math.cos(angle) * velocity,
+        dy: Math.sin(angle) * velocity,
+        life: 60
+      });
     }
   }
 
