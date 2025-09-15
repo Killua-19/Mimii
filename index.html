@@ -5,113 +5,97 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>💗Te quiero Mimi💗</title>
 <style>
-  body, html {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    height: 100%;
-    background-color: #000;
-    font-family: 'Arial Black', Arial, sans-serif;
-  }
-
-  #center-text {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2rem; 
-    font-weight: 900;
-    color: #fff;
-    text-shadow:
-      0 0 10px #fff,
-      0 0 20px #fff,
-      0 0 40px #fff,
-      0 0 60px #fff;
-    user-select: none;
-    white-space: nowrap;
-    z-index: 10;
-    text-align: center;
-  }
-
-  #falling-container {
-    position: fixed;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    overflow: hidden;
-    top: 0; 
-    left: 0;
-    z-index: 5;
-  }
-
-  .teamo {
-    position: absolute;
-    color: #ff1493;
-    font-weight: 900;
-    font-size: 1.5rem;
-    text-transform: uppercase;
-    text-shadow:
-      0 0 5px #ff69b4,
-      0 0 10px #ff1493,
-      0 0 15px #ff69b4,
-      0 0 20px #ff1493;
-    user-select: none;
-    white-space: nowrap;
-  }
-
-  .teamo::after {
-    content: attr(data-text);
-    position: absolute;
-    left: 0;
-    top: 100%;
-    transform: scaleY(-1);
-    color: #ff69b4;
-    opacity: 0.25;
-    filter: blur(1px);
-    text-shadow: none;
-  }
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  background-color: #000;
+  font-family: 'Arial Black', Arial, sans-serif;
+}
+#center-text {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow:
+    0 0 10px #fff,
+    0 0 20px #fff,
+    0 0 40px #fff,
+    0 0 60px #fff;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 10;
+  text-align: center;
+}
+#falling-container {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  z-index: 5;
+}
+.teamo {
+  position: absolute;
+  color: #ff1493;
+  font-weight: 900;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 5px #ff69b4,
+    0 0 10px #ff1493,
+    0 0 15px #ff69b4,
+    0 0 20px #ff1493;
+  user-select: none;
+  white-space: nowrap;
+}
+.teamo::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  transform: scaleY(-1);
+  color: #ff69b4;
+  opacity: 0.25;
+  filter: blur(1px);
+  text-shadow: none;
+}
 </style>
 </head>
 <body>
-
 <div id="falling-container"></div>
 <div id="center-text">💗Te quiero Mimi💗</div>
 
 <script>
 const container = document.getElementById('falling-container');
 const textos = [];
+const explosiones = [];
+
 const cantidadX = Math.floor(window.innerWidth / 120);
 const cantidadY = Math.floor(window.innerHeight / 50);
 
-// Crear letras de fondo
 for (let i = 0; i < cantidadX; i++) {
   for (let j = 0; j < cantidadY; j++) {
     const span = document.createElement('span');
     span.classList.add('teamo');
     span.setAttribute('data-text', 'Te quiero');
     span.textContent = 'Te quiero';
-
     span.style.left = `${i * 120 + Math.random()*20}px`;
     span.style.top = `${-Math.random()*window.innerHeight - j*50}px`;
-
     const size = 1.2 + Math.random() * 1.5;
     span.style.fontSize = `${size * 1.5}rem`;
-
     const speed = 1 + (2 - size) * 1.5; // un poco más rápido
-
     container.appendChild(span);
-
-    textos.push({
-      element: span,
-      speed: speed,
-      size: size,
-      x: parseFloat(span.style.left),
-      y: parseFloat(span.style.top),
-    });
+    textos.push({element: span, speed, size, x: parseFloat(span.style.left), y: parseFloat(span.style.top)});
   }
 }
 
-// Animación de caída
 function animar() {
   textos.forEach(obj => {
     obj.y += obj.speed;
@@ -122,65 +106,51 @@ function animar() {
     }
     obj.element.style.top = obj.y + 'px';
   });
+
+  // Animación de explosiones
+  explosiones.forEach((exp, idx) => {
+    exp.x += exp.dx;
+    exp.y += exp.dy;
+    exp.life--;
+    exp.element.style.left = exp.x + 'px';
+    exp.element.style.top = exp.y + 'px';
+    exp.element.style.opacity = exp.life/50;
+    if(exp.life <= 0){
+      container.removeChild(exp.element);
+      explosiones.splice(idx,1);
+    }
+  });
+
   requestAnimationFrame(animar);
 }
 animar();
 
-// Explosiones al tocar
-const explosiones = [];
-
 function explosion(x, y) {
-  for (let i = 0; i < 15; i++) {
-    const angle = Math.random() * 2 * Math.PI;
-    const velocity = 3 + Math.random() * 5;
-    explosiones.push({
-      x: x,
-      y: y,
-      dx: Math.cos(angle) * velocity,
-      dy: Math.sin(angle) * velocity,
-      life: 50
-    });
+  for(let i=0;i<15;i++){
+    const angle = Math.random()*2*Math.PI;
+    const velocity = 3 + Math.random()*5;
+    const span = document.createElement('span');
+    span.classList.add('teamo');
+    span.textContent = 'Te quiero';
+    span.style.left = x + 'px';
+    span.style.top = y + 'px';
+    container.appendChild(span);
+    explosiones.push({element: span, x, y, dx: Math.cos(angle)*velocity, dy: Math.sin(angle)*velocity, life:50});
   }
 }
 
-function animarExplosiones() {
-  explosiones.forEach((exp, idx) => {
-    exp.element = exp.element || document.createElement('span');
-    const el = exp.element;
-    el.className = 'teamo';
-    el.style.fontSize = '1.5rem';
-    el.style.left = exp.x + 'px';
-    el.style.top = exp.y + 'px';
-    container.appendChild(el);
-
-    exp.x += exp.dx;
-    exp.y += exp.dy;
-    exp.life--;
-
-    if (exp.life <= 0) {
-      container.removeChild(el);
-      explosiones.splice(idx, 1);
-    }
-  });
-  requestAnimationFrame(animarExplosiones);
-}
-
-animarExplosiones();
-
-document.addEventListener('click', e => explosion(e.clientX, e.clientY));
-document.addEventListener('touchstart', e => {
+document.addEventListener('click', e=>explosion(e.clientX,e.clientY));
+document.addEventListener('touchstart', e=>{
   const touch = e.touches[0];
-  explosion(touch.clientX, touch.clientY);
+  explosion(touch.clientX,touch.clientY);
 });
 
-// Ajuste de ventana
-window.addEventListener('resize', () => {
-  textos.forEach(obj => {
-    obj.x = Math.random() * window.innerWidth;
+window.addEventListener('resize', ()=>{
+  textos.forEach(obj=>{
+    obj.x = Math.random()*window.innerWidth;
     obj.element.style.left = obj.x + 'px';
   });
 });
 </script>
-
 </body>
 </html>
