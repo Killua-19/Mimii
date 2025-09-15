@@ -10,10 +10,8 @@
     padding: 0;
     overflow: hidden;
     height: 100%;
-    background-color: #000;
+    background-color: #000; /* fondo negro fijo */
     font-family: 'Arial Black', Arial, sans-serif;
-    color: white;
-    position: relative;
   }
 
   #center-text {
@@ -21,7 +19,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.3rem; /* más pequeña */
+    font-size: 1.3rem; /* más pequeño */
     font-weight: 900;
     color: #fff;
     text-shadow:
@@ -63,52 +61,89 @@
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  const palabra = "Te quiero"; // palabra completa
-  const fontSize = 20; // tamaño medio
-  const columns = Math.floor(canvas.width / (fontSize * 4)); // columnas más espaciadas
+  const palabra = "Te quiero"; 
+  const fontSize = 20; 
+  const columns = Math.floor(canvas.width / (fontSize * 4)); 
   const drops = Array(columns).fill(1);
 
+  // Partículas de explosión
+  const explosiones = [];
+
   function draw() {
-    // fondo negro con transparencia para crear rastro
+    // Fondo negro translúcido (mantiene estela Matrix)
     ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.font = fontSize + "px Arial Black";
     ctx.shadowColor = "#fff";
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = 8;
 
+    // Lluvia Matrix de "Te quiero"
     for (let i = 0; i < drops.length; i++) {
       const text = palabra;
 
-      // color blanco con brillo
       ctx.fillStyle = "rgba(255,255,255,1)";
       ctx.fillText(text, i * fontSize * 4, drops[i] * fontSize);
 
-      // efecto de desvanecimiento (reflejos hacia arriba)
+      // efecto de rastro
       for (let j = 1; j < 10; j++) {
         ctx.fillStyle = `rgba(255,255,255,${1 - j * 0.1})`;
         ctx.fillText(text, i * fontSize * 4, (drops[i] - j) * fontSize);
       }
 
-      // mover hacia abajo
       drops[i]++;
 
-      // reinicio aleatorio
       if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
         drops[i] = 0;
       }
     }
+
+    // Explosiones
+    explosiones.forEach((exp, idx) => {
+      ctx.font = "18px Arial Black";
+      ctx.shadowColor = "#fff";
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = `rgba(255,255,255,${exp.life/50})`;
+      ctx.fillText("Te quiero", exp.x, exp.y);
+
+      exp.x += exp.dx;
+      exp.y += exp.dy;
+      exp.life--;
+
+      if (exp.life <= 0) explosiones.splice(idx, 1);
+    });
   }
 
   setInterval(draw, 50);
 
-  // Ajuste al redimensionar
+  // Explosión al tocar
+  function explosion(x, y) {
+    for (let i = 0; i < 12; i++) {
+      const angle = Math.random() * 2 * Math.PI;
+      const velocity = 3 + Math.random() * 5;
+      explosiones.push({
+        x: x,
+        y: y,
+        dx: Math.cos(angle) * velocity,
+        dy: Math.sin(angle) * velocity,
+        life: 50
+      });
+    }
+  }
+
+  document.addEventListener("click", e => {
+    explosion(e.clientX, e.clientY);
+  });
+
+  document.addEventListener("touchstart", e => {
+    const touch = e.touches[0];
+    explosion(touch.clientX, touch.clientY);
+  });
+
+  // Ajustar canvas al cambiar ventana
   window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const newCols = Math.floor(canvas.width / (fontSize * 4));
-    drops.length = newCols;
-    drops.fill(1);
   });
 </script>
 
