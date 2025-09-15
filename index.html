@@ -10,10 +10,8 @@
     padding: 0;
     overflow: hidden;
     height: 100%;
-    background-color: #000; /* fondo negro */
+    background-color: #000;
     font-family: 'Arial Black', Arial, sans-serif;
-    color: white;
-    position: relative;
   }
 
   #center-text {
@@ -21,7 +19,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 2rem; /* un poco más grande */
+    font-size: 2rem; 
     font-weight: 900;
     color: #fff;
     text-shadow:
@@ -41,7 +39,7 @@
     height: 100vh;
     pointer-events: none;
     overflow: hidden;
-    top: 0;
+    top: 0; 
     left: 0;
     z-index: 5;
   }
@@ -82,9 +80,10 @@
 <script>
 const container = document.getElementById('falling-container');
 const textos = [];
-const cantidadX = Math.floor(window.innerWidth / 120); // columnas
-const cantidadY = Math.floor(window.innerHeight / 50);  // filas
+const cantidadX = Math.floor(window.innerWidth / 120);
+const cantidadY = Math.floor(window.innerHeight / 50);
 
+// Crear letras de fondo
 for (let i = 0; i < cantidadX; i++) {
   for (let j = 0; j < cantidadY; j++) {
     const span = document.createElement('span');
@@ -92,15 +91,13 @@ for (let i = 0; i < cantidadX; i++) {
     span.setAttribute('data-text', 'Te quiero');
     span.textContent = 'Te quiero';
 
-    // posición inicial
     span.style.left = `${i * 120 + Math.random()*20}px`;
     span.style.top = `${-Math.random()*window.innerHeight - j*50}px`;
 
-    // tamaño aleatorio
     const size = 1.2 + Math.random() * 1.5;
     span.style.fontSize = `${size * 1.5}rem`;
 
-    const speed = 0.5 + (2 - size) * 1.5;
+    const speed = 1 + (2 - size) * 1.5; // un poco más rápido
 
     container.appendChild(span);
 
@@ -114,6 +111,7 @@ for (let i = 0; i < cantidadX; i++) {
   }
 }
 
+// Animación de caída
 function animar() {
   textos.forEach(obj => {
     obj.y += obj.speed;
@@ -126,9 +124,56 @@ function animar() {
   });
   requestAnimationFrame(animar);
 }
-
 animar();
 
+// Explosiones al tocar
+const explosiones = [];
+
+function explosion(x, y) {
+  for (let i = 0; i < 15; i++) {
+    const angle = Math.random() * 2 * Math.PI;
+    const velocity = 3 + Math.random() * 5;
+    explosiones.push({
+      x: x,
+      y: y,
+      dx: Math.cos(angle) * velocity,
+      dy: Math.sin(angle) * velocity,
+      life: 50
+    });
+  }
+}
+
+function animarExplosiones() {
+  explosiones.forEach((exp, idx) => {
+    exp.element = exp.element || document.createElement('span');
+    const el = exp.element;
+    el.className = 'teamo';
+    el.style.fontSize = '1.5rem';
+    el.style.left = exp.x + 'px';
+    el.style.top = exp.y + 'px';
+    container.appendChild(el);
+
+    exp.x += exp.dx;
+    exp.y += exp.dy;
+    exp.life--;
+
+    if (exp.life <= 0) {
+      container.removeChild(el);
+      explosiones.splice(idx, 1);
+    }
+  });
+  requestAnimationFrame(animarExplosiones);
+}
+
+animarExplosiones();
+
+document.addEventListener('click', e => explosion(e.clientX, e.clientY));
+document.addEventListener('touchstart', e => {
+  const touch = e.touches[0];
+  explosion(touch.clientX, touch.clientY);
+});
+
+// Ajuste de ventana
 window.addEventListener('resize', () => {
   textos.forEach(obj => {
     obj.x = Math.random() * window.innerWidth;
