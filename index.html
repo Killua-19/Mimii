@@ -19,7 +19,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.6rem; /* un poquito más grande */
+    font-size: 1.7rem; /* un poquito más grande */
     font-weight: 900;
     color: #fff;
     text-shadow:
@@ -64,31 +64,31 @@
 
   const palabra = "Te quiero"; 
   const fontSize = 20; 
-  const columns = Math.floor(canvas.width / (fontSize * 4)); 
+  const columns = Math.floor(canvas.width / (fontSize * 3)); // más columnas, más letras
   const drops = Array(columns).fill(1);
 
   const explosiones = [];
 
   function draw() {
-    // Limpiar el canvas con negro sólido
-    ctx.fillStyle = "#000"; // negro absoluto
+    // Fondo negro absoluto
+    ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.font = fontSize + "px Arial Black";
-    ctx.shadowColor = "#fff";
-    ctx.shadowBlur = 8;
+    ctx.shadowColor = "#ff69b4"; // brillo rosa neón
+    ctx.shadowBlur = 10;
 
     for (let i = 0; i < drops.length; i++) {
       const text = palabra;
 
-      // palabra principal blanca
-      ctx.fillStyle = "rgba(255,255,255,1)";
-      ctx.fillText(text, i * fontSize * 4, drops[i] * fontSize);
+      // palabra principal rosa neón
+      ctx.fillStyle = "rgba(255,105,180,1)";
+      ctx.fillText(text, i * fontSize * 3, drops[i] * fontSize);
 
-      // rastro tipo Matrix: 10 copias desvanecidas arriba
+      // rastro tipo Matrix: 10 copias desvanecidas
       for (let j = 1; j < 10; j++) {
-        ctx.fillStyle = `rgba(255,255,255,${1 - j * 0.1})`;
-        ctx.fillText(text, i * fontSize * 4, (drops[i] - j) * fontSize);
+        ctx.fillStyle = `rgba(255,105,180,${1 - j * 0.1})`;
+        ctx.fillText(text, i * fontSize * 3, (drops[i] - j) * fontSize);
       }
 
       drops[i]++;
@@ -97,12 +97,12 @@
       }
     }
 
-    // Explosiones
+    // Explosiones al tocar/click
     explosiones.forEach((exp, idx) => {
       ctx.font = "18px Arial Black";
-      ctx.shadowColor = "#fff";
+      ctx.shadowColor = "#ff69b4";
       ctx.shadowBlur = 12;
-      ctx.fillStyle = `rgba(255,255,255,${exp.life/50})`;
+      ctx.fillStyle = `rgba(255,105,180,${exp.life/50})`;
       ctx.fillText("Te quiero", exp.x, exp.y);
 
       exp.x += exp.dx;
