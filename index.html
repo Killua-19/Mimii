@@ -10,7 +10,7 @@
     padding: 0;
     overflow: hidden;
     height: 100%;
-    background-color: #000; /* negro absoluto */
+    background-color: #000; /* fondo negro absoluto */
     font-family: 'Arial Black', Arial, sans-serif;
   }
 
@@ -19,7 +19,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 2rem; /* más grande que antes */
+    font-size: 2rem; /* más grande */
     font-weight: 900;
     color: #fff;
     text-shadow:
@@ -46,7 +46,7 @@
     top: 0;
     left: 0;
     z-index: 5;
-    background: #000; /* negro absoluto */
+    background: #000;
   }
 </style>
 </head>
@@ -62,53 +62,51 @@
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  const palabra = "Te quiero"; 
-  const fontSize = 30; // más grande
-  const columns = Math.floor(canvas.width / (fontSize * 3)); // más columnas para más letras
-  const drops = Array(columns).fill(1);
+  const palabra = "Te quiero ";
+  const fontSize = 28; // tamaño más grande
+  const columns = Math.floor(canvas.width / fontSize);
+  const drops = Array(columns).fill(0); // posición inicial aleatoria vertical
 
   const explosiones = [];
 
   function draw() {
-    // Fondo negro absoluto
+    // fondo negro absoluto
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.font = fontSize + "px Arial Black";
-    ctx.shadowColor = "#ff69b4"; // brillo rosa neón
-    ctx.shadowBlur = 12;
+    ctx.shadowColor = "#ff00ff"; // rosa neón intenso
+    ctx.shadowBlur = 15;
 
     for (let i = 0; i < drops.length; i++) {
-      const text = palabra;
+      let x = i * fontSize;
+      let y = drops[i] * fontSize;
 
-      // palabra principal rosa neón
-      ctx.fillStyle = "rgba(255,105,180,1)";
-      ctx.fillText(text, i * fontSize * 3, drops[i] * fontSize);
+      // dibujar palabra principal
+      ctx.fillStyle = "#ff00ff"; // rosa neón intenso
+      ctx.fillText(palabra, x, y);
 
-      // rastro tipo Matrix: 10 copias desvanecidas
+      // reflejo / rastro tipo Matrix
       for (let j = 1; j < 10; j++) {
-        ctx.fillStyle = `rgba(255,105,180,${1 - j * 0.1})`;
-        ctx.fillText(text, i * fontSize * 3, (drops[i] - j) * fontSize);
+        ctx.fillStyle = `rgba(255,0,255,${1 - j * 0.1})`;
+        ctx.fillText(palabra, x, y - j * fontSize);
       }
 
-      drops[i]++;
-      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-        drops[i] = 0;
-      }
+      drops[i] += 1.2; // velocidad de caída
+      if (drops[i] * fontSize > canvas.height) drops[i] = 0;
     }
 
-    // Explosiones al tocar/click
+    // explosiones al tocar
     explosiones.forEach((exp, idx) => {
-      ctx.font = "28px Arial Black"; // más grande en explosión también
-      ctx.shadowColor = "#ff69b4";
-      ctx.shadowBlur = 14;
-      ctx.fillStyle = `rgba(255,105,180,${exp.life/50})`;
-      ctx.fillText("Te quiero", exp.x, exp.y);
+      ctx.font = "28px Arial Black";
+      ctx.shadowColor = "#ff00ff";
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = `rgba(255,0,255,${exp.life/50})`;
+      ctx.fillText("Te quiero ", exp.x, exp.y);
 
       exp.x += exp.dx;
       exp.y += exp.dy;
       exp.life--;
-
       if (exp.life <= 0) explosiones.splice(idx, 1);
     });
   }
@@ -116,7 +114,7 @@
   setInterval(draw, 50);
 
   function explosion(x, y) {
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 20; i++) {
       const angle = Math.random() * 2 * Math.PI;
       const velocity = 3 + Math.random() * 5;
       explosiones.push({
