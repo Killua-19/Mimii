@@ -21,25 +21,22 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 2.5rem;
+    font-size: 2rem; /* más pequeño */
     font-weight: 900;
-    background: linear-gradient(90deg, #ff69b4, #ff1493, #fff, #ff1493, #ff69b4);
-    background-size: 400% 400%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shine 6s ease infinite, pulse 2s ease-in-out infinite;
-    text-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+    color: #fff;
+    text-shadow: 
+      0 0 10px #fff,
+      0 0 20px #fff,
+      0 0 40px #fff,
+      0 0 60px #fff,
+      0 0 80px #fff;
+    animation: pulse 2s ease-in-out infinite;
     user-select: none;
     white-space: nowrap;
     z-index: 10;
     text-align: center;
   }
 
-  @keyframes shine {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
   @keyframes pulse {
     0%, 100% { transform: translate(-50%, -50%) scale(1); }
     50% { transform: translate(-50%, -50%) scale(1.1); }
@@ -59,15 +56,26 @@
     position: absolute;
     color: #ff1493;
     font-weight: 900;
-    font-size: 1.8rem;
+    font-size: 1rem; /* más pequeño */
     text-transform: uppercase;
     text-shadow:
       0 0 5px #ff69b4,
-      0 0 15px #ff1493,
-      0 0 25px #ff69b4;
+      0 0 10px #ff1493;
     user-select: none;
     white-space: nowrap;
     will-change: transform;
+  }
+
+  /* reflejo tipo Matrix */
+  .teamo::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    transform: scaleY(-1);
+    opacity: 0.2;
+    color: #ff69b4;
+    filter: blur(1px);
   }
 </style>
 </head>
@@ -81,7 +89,7 @@
   const container = document.getElementById('falling-container');
   const textos = [];
   const explosiones = [];
-  const cantidad = 40;
+  const cantidad = 70; // más densidad
 
   let viewportWidth = window.innerWidth;
   let viewportHeight = window.innerHeight;
@@ -90,11 +98,9 @@
   for(let i=0; i<cantidad; i++) {
     const span = document.createElement('span');
     span.classList.add('teamo');
+    span.setAttribute('data-text', 'TE QUIERO');
     span.textContent = 'TE QUIERO';
     container.appendChild(span);
-
-    const size = 1 + Math.random() * 1.5;
-    span.style.fontSize = (size * 2) + 'rem';
 
     textos.push({
       element: span,
@@ -147,11 +153,12 @@
 
   // Explosión
   function explosion(x, y) {
-    for (let i=0; i<15; i++) { // menos partículas = más fluido
+    for (let i=0; i<12; i++) { // menos partículas para más suavidad
       const span = document.createElement('span');
       span.classList.add('teamo');
+      span.setAttribute('data-text', 'TE QUIERO');
       span.textContent = 'TE QUIERO';
-      span.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
+      span.style.fontSize = "1rem"; // explosion también pequeño
       container.appendChild(span);
 
       let angle = Math.random() * 2 * Math.PI;
