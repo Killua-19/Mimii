@@ -10,7 +10,7 @@
     padding: 0;
     overflow: hidden;
     height: 100%;
-    background-color: #000; /* NEGRO puro */
+    background-color: #000; /* negro absoluto */
     font-family: 'Arial Black', Arial, sans-serif;
   }
 
@@ -19,7 +19,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.3rem;
+    font-size: 1.6rem; /* un poquito más grande */
     font-weight: 900;
     color: #fff;
     text-shadow:
@@ -46,7 +46,7 @@
     top: 0;
     left: 0;
     z-index: 5;
-    background: #000; /* negro sólido */
+    background: #000; /* negro absoluto */
   }
 </style>
 </head>
@@ -70,8 +70,8 @@
   const explosiones = [];
 
   function draw() {
-    // Fondo negro sólido + capa muy leve para rastro
-    ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+    // Limpiar el canvas con negro sólido
+    ctx.fillStyle = "#000"; // negro absoluto
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.font = fontSize + "px Arial Black";
@@ -81,9 +81,11 @@
     for (let i = 0; i < drops.length; i++) {
       const text = palabra;
 
+      // palabra principal blanca
       ctx.fillStyle = "rgba(255,255,255,1)";
       ctx.fillText(text, i * fontSize * 4, drops[i] * fontSize);
 
+      // rastro tipo Matrix: 10 copias desvanecidas arriba
       for (let j = 1; j < 10; j++) {
         ctx.fillStyle = `rgba(255,255,255,${1 - j * 0.1})`;
         ctx.fillText(text, i * fontSize * 4, (drops[i] - j) * fontSize);
