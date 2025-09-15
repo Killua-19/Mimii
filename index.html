@@ -10,8 +10,10 @@
     padding: 0;
     overflow: hidden;
     height: 100%;
-    background-color: #000; /* negro absoluto */
+    background-color: #000; /* fondo negro */
     font-family: 'Arial Black', Arial, sans-serif;
+    color: white;
+    position: relative;
   }
 
   #center-text {
@@ -19,125 +21,120 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.7rem; /* un poco más grande */
+    font-size: 2rem; /* un poco más grande */
     font-weight: 900;
     color: #fff;
     text-shadow:
       0 0 10px #fff,
       0 0 20px #fff,
       0 0 40px #fff,
-      0 0 60px #fff,
-      0 0 80px #fff;
-    animation: pulse 2s ease-in-out infinite;
+      0 0 60px #fff;
     user-select: none;
     white-space: nowrap;
     z-index: 10;
     text-align: center;
   }
 
-  @keyframes pulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.1); }
-  }
-
-  canvas {
-    display: block;
+  #falling-container {
     position: fixed;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    overflow: hidden;
     top: 0;
     left: 0;
     z-index: 5;
+  }
+
+  .teamo {
+    position: absolute;
+    color: #ff1493;
+    font-weight: 900;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    text-shadow:
+      0 0 5px #ff69b4,
+      0 0 10px #ff1493,
+      0 0 15px #ff69b4,
+      0 0 20px #ff1493;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .teamo::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    transform: scaleY(-1);
+    color: #ff69b4;
+    opacity: 0.25;
+    filter: blur(1px);
+    text-shadow: none;
   }
 </style>
 </head>
 <body>
 
+<div id="falling-container"></div>
 <div id="center-text">💗Te quiero Mimi💗</div>
-<canvas id="matrix"></canvas>
 
 <script>
-  const canvas = document.getElementById("matrix");
-  const ctx = canvas.getContext("2d");
+const container = document.getElementById('falling-container');
+const textos = [];
+const cantidadX = Math.floor(window.innerWidth / 120); // columnas
+const cantidadY = Math.floor(window.innerHeight / 50);  // filas
 
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+for (let i = 0; i < cantidadX; i++) {
+  for (let j = 0; j < cantidadY; j++) {
+    const span = document.createElement('span');
+    span.classList.add('teamo');
+    span.setAttribute('data-text', 'Te quiero');
+    span.textContent = 'Te quiero';
 
-  const palabra = "TE QUIERO"; 
-  const fontSize = 20; 
-  const columns = Math.floor(canvas.width / (fontSize * 2.5)); 
-  const drops = Array(columns).fill(1);
+    // posición inicial
+    span.style.left = `${i * 120 + Math.random()*20}px`;
+    span.style.top = `${-Math.random()*window.innerHeight - j*50}px`;
 
-  const explosiones = [];
+    // tamaño aleatorio
+    const size = 1.2 + Math.random() * 1.5;
+    span.style.fontSize = `${size * 1.5}rem`;
 
-  function draw() {
-    // Fondo negro absoluto
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const speed = 0.5 + (2 - size) * 1.5;
 
-    ctx.font = fontSize + "px Arial Black";
-    
-    for (let i = 0; i < drops.length; i++) {
-      let x = i * fontSize * 2.5;
-      let y = drops[i] * fontSize;
+    container.appendChild(span);
 
-      // Letras estilo rosa neón con sombra y reflejo
-      ctx.fillStyle = "#ff1493"; // rosa neón intenso
-      ctx.shadowColor = "#ff69b4";
-      ctx.shadowBlur = 8;
-      ctx.fillText(palabra, x, y);
-
-      // Reflejo tipo espejo
-      ctx.fillStyle = "#ff69b4";
-      ctx.globalAlpha = 0.25;
-      ctx.fillText(palabra, x, y + fontSize);
-      ctx.globalAlpha = 1;
-
-      drops[i] += 1.2;
-      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-        drops[i] = 0;
-      }
-    }
-
-    // Explosiones al tocar/click
-    explosiones.forEach((exp, idx) => {
-      ctx.font = "18px Arial Black";
-      ctx.shadowColor = "#ff69b4";
-      ctx.shadowBlur = 12;
-      ctx.fillStyle = `rgba(255,20,147,${exp.life/50})`;
-      ctx.fillText("TE QUIERO", exp.x, exp.y);
-
-      exp.x += exp.dx;
-      exp.y += exp.dy;
-      exp.life--;
-      if (exp.life <= 0) explosiones.splice(idx, 1);
+    textos.push({
+      element: span,
+      speed: speed,
+      size: size,
+      x: parseFloat(span.style.left),
+      y: parseFloat(span.style.top),
     });
   }
+}
 
-  setInterval(draw, 50);
-
-  function explosion(x, y) {
-    for (let i = 0; i < 12; i++) {
-      const angle = Math.random() * 2 * Math.PI;
-      const velocity = 3 + Math.random() * 5;
-      explosiones.push({
-        x: x,
-        y: y,
-        dx: Math.cos(angle) * velocity,
-        dy: Math.sin(angle) * velocity,
-        life: 50
-      });
+function animar() {
+  textos.forEach(obj => {
+    obj.y += obj.speed;
+    if (obj.y > window.innerHeight) {
+      obj.y = -50 - Math.random()*100;
+      obj.x = Math.random() * window.innerWidth;
+      obj.element.style.left = obj.x + 'px';
     }
-  }
-
-  document.addEventListener("click", e => explosion(e.clientX, e.clientY));
-  document.addEventListener("touchstart", e => {
-    const touch = e.touches[0];
-    explosion(touch.clientX, touch.clientY);
+    obj.element.style.top = obj.y + 'px';
   });
+  requestAnimationFrame(animar);
+}
 
-  window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+animar();
+
+window.addEventListener('resize', () => {
+  textos.forEach(obj => {
+    obj.x = Math.random() * window.innerWidth;
+    obj.element.style.left = obj.x + 'px';
   });
+});
 </script>
 
 </body>
