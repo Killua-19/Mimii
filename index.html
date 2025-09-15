@@ -19,7 +19,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.7rem; /* un poquito más grande */
+    font-size: 2rem; /* más grande que antes */
     font-weight: 900;
     color: #fff;
     text-shadow:
@@ -63,8 +63,8 @@
   canvas.height = window.innerHeight;
 
   const palabra = "Te quiero"; 
-  const fontSize = 20; 
-  const columns = Math.floor(canvas.width / (fontSize * 3)); // más columnas, más letras
+  const fontSize = 30; // más grande
+  const columns = Math.floor(canvas.width / (fontSize * 3)); // más columnas para más letras
   const drops = Array(columns).fill(1);
 
   const explosiones = [];
@@ -76,7 +76,7 @@
 
     ctx.font = fontSize + "px Arial Black";
     ctx.shadowColor = "#ff69b4"; // brillo rosa neón
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = 12;
 
     for (let i = 0; i < drops.length; i++) {
       const text = palabra;
@@ -99,9 +99,9 @@
 
     // Explosiones al tocar/click
     explosiones.forEach((exp, idx) => {
-      ctx.font = "18px Arial Black";
+      ctx.font = "28px Arial Black"; // más grande en explosión también
       ctx.shadowColor = "#ff69b4";
-      ctx.shadowBlur = 12;
+      ctx.shadowBlur = 14;
       ctx.fillStyle = `rgba(255,105,180,${exp.life/50})`;
       ctx.fillText("Te quiero", exp.x, exp.y);
 
@@ -116,7 +116,7 @@
   setInterval(draw, 50);
 
   function explosion(x, y) {
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 15; i++) {
       const angle = Math.random() * 2 * Math.PI;
       const velocity = 3 + Math.random() * 5;
       explosiones.push({
