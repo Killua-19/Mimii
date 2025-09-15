@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>💗 Te quiero mucho Mimi 💗</title>
+<title>💗Te quiero Mimi💗</title>
 <style>
   body, html {
     margin: 0;
@@ -21,10 +21,10 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 2rem; /* más pequeño */
+    font-size: 1.5rem; /* más pequeño */
     font-weight: 900;
     color: #fff;
-    text-shadow: 
+    text-shadow:
       0 0 10px #fff,
       0 0 20px #fff,
       0 0 40px #fff,
@@ -42,145 +42,71 @@
     50% { transform: translate(-50%, -50%) scale(1.1); }
   }
 
-  #falling-container {
+  canvas {
+    display: block;
     position: fixed;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    overflow: hidden;
-    top: 0; left: 0;
-    z-index: 5;
-  }
-
-  .teamo {
-    position: absolute;
-    color: #ff1493;
-    font-weight: 900;
-    font-size: 1rem; /* más pequeño */
-    text-transform: uppercase;
-    text-shadow:
-      0 0 5px #ff69b4,
-      0 0 10px #ff1493;
-    user-select: none;
-    white-space: nowrap;
-    will-change: transform;
-  }
-
-  /* reflejo tipo Matrix */
-  .teamo::after {
-    content: attr(data-text);
-    position: absolute;
+    top: 0;
     left: 0;
-    top: 100%;
-    transform: scaleY(-1);
-    opacity: 0.2;
-    color: #ff69b4;
-    filter: blur(1px);
+    z-index: 5;
   }
 </style>
 </head>
 <body>
 
-<div id="falling-container"></div>
-
-<div id="center-text">💗 Te quiero mucho Mimi 💗</div>
+<div id="center-text">💗Te quiero Mimi💗</div>
+<canvas id="matrix"></canvas>
 
 <script>
-  const container = document.getElementById('falling-container');
-  const textos = [];
-  const explosiones = [];
-  const cantidad = 70; // más densidad
+  const canvas = document.getElementById("matrix");
+  const ctx = canvas.getContext("2d");
 
-  let viewportWidth = window.innerWidth;
-  let viewportHeight = window.innerHeight;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 
-  // Letras cayendo
-  for(let i=0; i<cantidad; i++) {
-    const span = document.createElement('span');
-    span.classList.add('teamo');
-    span.setAttribute('data-text', 'TE QUIERO');
-    span.textContent = 'TE QUIERO';
-    container.appendChild(span);
+  const letters = ["T","E"," ","Q","U","I","E","R","O"]; // mensaje romántico
+  const fontSize = 18; // tamaño medio
+  const columns = Math.floor(canvas.width / fontSize); // número de columnas
+  const drops = Array(columns).fill(1);
 
-    textos.push({
-      element: span,
-      speed: 2 + Math.random() * 2,
-      x: Math.random() * viewportWidth,
-      y: Math.random() * -viewportHeight,
-    });
-  }
+  function draw() {
+    // Fondo negro con transparencia -> deja rastros
+    ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Animación principal
-  function animar() {
-    // caída
-    textos.forEach(obj => {
-      obj.y += obj.speed;
-      if (obj.y > viewportHeight) {
-        obj.y = -30 - Math.random()*100;
-        obj.x = Math.random() * viewportWidth;
+    ctx.font = fontSize + "px Arial Black";
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = letters[Math.floor(Math.random() * letters.length)];
+      ctx.fillStyle = "rgba(255,105,180,1)"; // rosa fuerte
+      ctx.shadowColor = "#ff69b4";
+      ctx.shadowBlur = 10;
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+      // efecto "desvanecimiento estilo Matrix" con reflejos
+      for (let j = 1; j < 10; j++) {
+        ctx.fillStyle = `rgba(255,105,180,${1 - j * 0.1})`;
+        ctx.fillText(text, i * fontSize, (drops[i] - j) * fontSize);
       }
-      obj.element.style.transform = `translate(${obj.x}px, ${obj.y}px)`;
-    });
 
-    // explosiones
-    explosiones.forEach(exp => {
-      exp.life--;
-      exp.x += exp.dx;
-      exp.y += exp.dy;
-      exp.element.style.transform = `translate(${exp.x}px, ${exp.y}px)`;
-      if (exp.life <= 0) {
-        exp.dead = true;
-      }
-    });
+      // mover hacia abajo
+      drops[i]++;
 
-    // limpiar explosiones muertas
-    for (let i = explosiones.length - 1; i >= 0; i--) {
-      if (explosiones[i].dead) {
-        explosiones[i].element.remove();
-        explosiones.splice(i, 1);
+      // reiniciar arriba con random
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
       }
     }
-
-    requestAnimationFrame(animar);
-  }
-  animar();
-
-  // Redimensionar
-  window.addEventListener('resize', () => {
-    viewportWidth = window.innerWidth;
-    viewportHeight = window.innerHeight;
-  });
-
-  // Explosión
-  function explosion(x, y) {
-    for (let i=0; i<12; i++) { // menos partículas para más suavidad
-      const span = document.createElement('span');
-      span.classList.add('teamo');
-      span.setAttribute('data-text', 'TE QUIERO');
-      span.textContent = 'TE QUIERO';
-      span.style.fontSize = "1rem"; // explosion también pequeño
-      container.appendChild(span);
-
-      let angle = Math.random() * 2 * Math.PI;
-      let velocity = 3 + Math.random() * 5;
-
-      explosiones.push({
-        element: span,
-        x: x,
-        y: y,
-        dx: Math.cos(angle) * velocity,
-        dy: Math.sin(angle) * velocity,
-        life: 50
-      });
-    }
   }
 
-  document.addEventListener('click', e => {
-    explosion(e.clientX, e.clientY);
-  });
-  document.addEventListener('touchstart', e => {
-    const touch = e.touches[0];
-    explosion(touch.clientX, touch.clientY);
+  setInterval(draw, 50);
+
+  // Ajuste al redimensionar
+  window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const newCols = Math.floor(canvas.width / fontSize);
+    drops.length = newCols;
+    drops.fill(1);
   });
 </script>
 
