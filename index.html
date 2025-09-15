@@ -10,7 +10,7 @@
     padding: 0;
     overflow: hidden;
     height: 100%;
-    background-color: #000; /* fondo negro fijo */
+    background-color: #000; /* NEGRO puro */
     font-family: 'Arial Black', Arial, sans-serif;
   }
 
@@ -19,7 +19,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.3rem; /* más pequeño */
+    font-size: 1.3rem;
     font-weight: 900;
     color: #fff;
     text-shadow:
@@ -46,6 +46,7 @@
     top: 0;
     left: 0;
     z-index: 5;
+    background: #000; /* negro sólido */
   }
 </style>
 </head>
@@ -66,33 +67,29 @@
   const columns = Math.floor(canvas.width / (fontSize * 4)); 
   const drops = Array(columns).fill(1);
 
-  // Partículas de explosión
   const explosiones = [];
 
   function draw() {
-    // Fondo negro translúcido (mantiene estela Matrix)
-    ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+    // Fondo negro sólido + capa muy leve para rastro
+    ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.font = fontSize + "px Arial Black";
     ctx.shadowColor = "#fff";
     ctx.shadowBlur = 8;
 
-    // Lluvia Matrix de "Te quiero"
     for (let i = 0; i < drops.length; i++) {
       const text = palabra;
 
       ctx.fillStyle = "rgba(255,255,255,1)";
       ctx.fillText(text, i * fontSize * 4, drops[i] * fontSize);
 
-      // efecto de rastro
       for (let j = 1; j < 10; j++) {
         ctx.fillStyle = `rgba(255,255,255,${1 - j * 0.1})`;
         ctx.fillText(text, i * fontSize * 4, (drops[i] - j) * fontSize);
       }
 
       drops[i]++;
-
       if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
         drops[i] = 0;
       }
@@ -116,7 +113,6 @@
 
   setInterval(draw, 50);
 
-  // Explosión al tocar
   function explosion(x, y) {
     for (let i = 0; i < 12; i++) {
       const angle = Math.random() * 2 * Math.PI;
@@ -131,16 +127,12 @@
     }
   }
 
-  document.addEventListener("click", e => {
-    explosion(e.clientX, e.clientY);
-  });
-
+  document.addEventListener("click", e => explosion(e.clientX, e.clientY));
   document.addEventListener("touchstart", e => {
     const touch = e.touches[0];
     explosion(touch.clientX, touch.clientY);
   });
 
-  // Ajustar canvas al cambiar ventana
   window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
